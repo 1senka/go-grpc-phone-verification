@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package product;
+
+option go_package = "./pkg/product/pb";
+
+message CreateProfileRequest {
+  string name = 1;
+  string email = 2;
+  string phone = 3;
+  int32 gender = 4;
+  string clientType = 5;
+  string birthDate = 6;
+
+}
+
+message CreateProfileResponse {
+  int64 status = 1;
+  string error = 2;
+  int64 id = 3;
+}
+
+// FindOne
+
+message FindOneData {
+  string name = 1;
+  string email = 2;
+  string phone = 3;
+  int32 gender = 4;
+  string clientType = 5;
+  string birthDate = 6;
+
+}
+
+message FindOneRequest { int64 id = 1; }
+
+message FindOneResponse {
+  int64 status = 1;
+  string error = 2;
+  FindOneData data = 3;
+}
+
+service ProfileService {
+  rpc CreateProfile(CreateProfileRequest) returns (CreateProfileResponse) {}
+  rpc FindOne(FindOneRequest) returns (FindOneResponse) {}
+}
