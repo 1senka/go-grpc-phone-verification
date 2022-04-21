@@ -135,7 +135,7 @@ type ProfileServiceServer interface {
 	GetFreeTime(context.Context, *GetFreeTimeRequest) (*GetFreeTimeResponse, error)
 	ClientUpdateProfile(context.Context, *ClientUpdateProfileRequest) (*ClientUpdateProfileResponse, error)
 	TherapistUpdateProfile(context.Context, *TherapistUpdateProfileRequest) (*TherapistUpdateProfileResponse, error)
-	mustEmbedUnimplementedProfileServiceServer()
+	//mustEmbedUnimplementedProfileServiceServer()
 }
 
 // UnimplementedProfileServiceServer must be embedded to have forward compatible implementations.

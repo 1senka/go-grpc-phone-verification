@@ -14,16 +14,30 @@ func RegisterRoutes(r *gin.Engine, c *config.Config, authSvc *auth.ServiceClient
 		Client: InitServiceClient(c),
 	}
 
-	routes := r.Group("/product")
+	routes := r.Group("/profile")
 	routes.Use(a.AuthRequired)
-	routes.POST("/", svc.CreateProduct)
-	routes.GET("/:id", svc.FindOne)
+	routes.POST("/", svc.CreateProfile)
+	routes.POST("/getProfile", svc.GetProfile)
+	routes.PUT("/", svc.UpdateProfile)
+	routes.POST("/freeTime", svc.GetTherapistFreeTime)
+	routes.POST("/setTime", svc.SetFreeTime)
+
 }
 
-func (svc *ServiceClient) FindOne(ctx *gin.Context) {
-	routes.FineOne(ctx, svc.Client)
+func (svc *ServiceClient) CreateProfile(c *gin.Context) {
+	routes.CreateProfile(c, svc.Client)
 }
 
-func (svc *ServiceClient) CreateProduct(ctx *gin.Context) {
-	routes.CreateProfile(ctx, svc.Client)
+func (svc *ServiceClient) UpdateProfile(ctx *gin.Context) {
+	routes.UpdateProfile(ctx, svc.Client)
+}
+
+func (svc *ServiceClient) GetTherapistFreeTime(ctx *gin.Context) {
+	routes.GetTherapistFreeTime(ctx, svc.Client)
+}
+func (svc *ServiceClient) SetFreeTime(ctx *gin.Context) {
+	routes.SetFreeTime(ctx, svc.Client)
+}
+func (svc *ServiceClient) GetProfile(ctx *gin.Context) {
+	routes.GetProfile(ctx, svc.Client)
 }
