@@ -112,5 +112,6 @@ func (s *Server) ValidateToken(ctx context.Context, req *pb.ValidateRequest) (*p
 	return &pb.ValidateResponse{
 		Status: http.StatusOK,
 		UserId: user.Id,
+		Phone:  user.Phone,
 	}, nil
 }

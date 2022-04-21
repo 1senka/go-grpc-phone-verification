@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.20.0
-// source: pkg/pb/profile.proto
+// source: pkg/pb/auth.proto
 
 package pb
 
@@ -69,7 +69,7 @@ type AuthServiceServer interface {
 	PhoneProof(context.Context, *ClientPhoneProofRequest) (*ClientPhoneProofResponse, error)
 	PhoneToken(context.Context, *ClientPhoneTokenRequest) (*ClientPhoneTokenResponse, error)
 	ValidateToken(context.Context, *ValidateRequest) (*ValidateResponse, error)
-	//mustEmbedUnimplementedAuthServiceServer()
+	mustEmbedUnimplementedAuthServiceServer()
 }
 
 // UnimplementedAuthServiceServer must be embedded to have forward compatible implementations.
@@ -173,5 +173,5 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pkg/pb/profile.proto",
+	Metadata: "pkg/pb/auth.proto",
 }

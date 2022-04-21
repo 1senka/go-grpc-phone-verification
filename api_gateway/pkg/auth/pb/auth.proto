@@ -1,6 +1,6 @@
 syntax = 'proto3';
 package auth;
-option go_package = "./pkg/auth/pb";
+option go_package = "./pkg/pb";
 
 message ClientPhoneProofRequest{
   string phone = 1;
@@ -30,4 +30,4 @@ message ValidateResponse {
   int64 status = 1;
   string error = 2;
   int64 userId = 3;
-}
+  string phone = 4;}
