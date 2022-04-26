@@ -1,0 +1,47 @@
+syntax = 'proto3';
+package booking;
+option go_package = "./pkg/pb";
+message BookingRequest {
+  string userId =1;
+  string sessionType=2;
+  bool isHotline = 3;
+
+}
+message BookingResponse {
+  string userId =1;
+  string sessionType=2;
+  bool isHotline = 3;
+  string bookingId = 4;
+
+  string bookingTime = 5;
+  string bookingStatus = 6;
+  int32 status = 7;
+  string therapistId = 8;
+  string therapistName = 9;
+}
+message Booking{
+  string bookingId = 1;
+  string userId = 2;
+  string sessionType = 3;
+  bool isHotline = 4;
+  string bookingTime = 5;
+  string bookingStatus = 6;
+  int32 status = 7;
+  string therapistId = 8;
+  string therapistName = 9;
+  bool isPaid = 10;
+}
+message GetBookingListRequest {
+  string userId =1;
+
+}
+
+message GetBookingListResponse {
+  repeated Booking bookings =1;
+  int32 status = 2;
+}
+service BookingService {
+  rpc Booking(BookingRequest) returns (BookingResponse);
+  rpc GetBookingList(GetBookingListRequest) returns (GetBookingListResponse);
+
+}

@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.28.0
 // 	protoc        v3.20.0
-// source: pkg/pb/auth.proto
+// source: pkg/profilepb/auth.proto
 
 package pb
 

@@ -1,4 +1,4 @@
-package product
+package profile
 
 import (
 	"github.com/1senka/go-grpc-api-gateway/pkg/auth"
@@ -19,7 +19,7 @@ func RegisterRoutes(r *gin.Engine, c *config.Config, authSvc *auth.ServiceClient
 	routes.POST("/", svc.CreateProfile)
 	routes.POST("/getProfile", svc.GetProfile)
 	routes.PUT("/", svc.UpdateProfile)
-	routes.POST("/freeTime", svc.GetTherapistFreeTime)
+	routes.GET("/freeTime", svc.GetTherapistFreeTime)
 	routes.POST("/setTime", svc.SetFreeTime)
 
 }

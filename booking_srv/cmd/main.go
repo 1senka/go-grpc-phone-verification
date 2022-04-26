@@ -2,15 +2,17 @@ package main
 
 import (
 	"fmt"
+
 	//"github.com/1senka/go-grpc-profile-svc/pkg/sms"
+	"github.com/1senka/go-grpc-booking-svc/pkg/config"
+	"github.com/1senka/go-grpc-booking-svc/pkg/db"
+	"github.com/1senka/go-grpc-booking-svc/pkg/pb"
+
+	"github.com/1senka/go-grpc-booking-svc/pkg/profilepb"
+	"github.com/1senka/go-grpc-booking-svc/pkg/services"
+	"google.golang.org/grpc"
 	"log"
 	"net"
-
-	"github.com/1senka/go-grpc-profile-svc/pkg/config"
-	"github.com/1senka/go-grpc-profile-svc/pkg/db"
-	"github.com/1senka/go-grpc-profile-svc/pkg/pb"
-	"github.com/1senka/go-grpc-profile-svc/pkg/services"
-	"google.golang.org/grpc"
 )
 
 func main() {
@@ -27,17 +29,24 @@ func main() {
 	if err != nil {
 		log.Fatalln("Failed to listing:", err)
 	}
-
-	fmt.Println("Profile Svc on", c.Port)
+	conn, err := grpc.Dial("localhost:5000", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+	cc := profilepb.NewProfileServiceClient(conn)
+	fmt.Println("created client ", c)
+	fmt.Println("Booking Svc on", c.Port)
 
 	s := services.Server{
 		H: h,
 		//Sms: ss,
+		C: cc,
 	}
 
 	grpcServer := grpc.NewServer()
 
-	pb.RegisterProfileServiceServer(grpcServer, &s)
+	pb.RegisterBookingServiceServer(grpcServer, &s)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalln("Failed to serve:", err)

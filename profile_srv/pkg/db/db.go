@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"fmt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
@@ -19,22 +21,24 @@ type Handler struct {
 }
 
 func Init(url string) Handler {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-
-	db, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatal(err)
+		fmt.Println(err)
 	}
-	defer func() {
-		if err = db.Disconnect(ctx); err != nil {
-			panic(err)
-		}
-	}()
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
+		fmt.Println(err)
 	}
-	ClientCollection = db.Database("profile").Collection("client")
-	TherapistCollection = db.Database("profile").Collection("therapist")
-	FreeTimeCollection = db.Database("profile").Collection("freetime")
-	return Handler{ClientCollection: ClientCollection, TherapistCollection: TherapistCollection}
+
+	/*
+	   List databases
+	*/
+	fmt.Println(client.ListDatabaseNames(ctx, bson.M{}))
+	ClientCollection = client.Database("psycology").Collection("client")
+	TherapistCollection = client.Database("psycology").Collection("therapist")
+	FreeTimeCollection = client.Database("psycology").Collection("freetime")
+	return Handler{ClientCollection: ClientCollection, TherapistCollection: TherapistCollection, FreeTimeCollection: FreeTimeCollection}
 }

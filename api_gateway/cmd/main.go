@@ -19,7 +19,7 @@ func main() {
 	r := gin.Default()
 
 	authSvc := *auth.RegisterRoutes(r, &c)
-	product.RegisterRoutes(r, &c, &authSvc)
+	profile.RegisterRoutes(r, &c, &authSvc)
 
 	r.Run(c.Port)
 }

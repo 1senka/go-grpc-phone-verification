@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"github.com/1senka/go-grpc-profile-svc/pkg/db"
 	"github.com/1senka/go-grpc-profile-svc/pkg/pb"
 	"github.com/kavenegar/kavenegar-go"
@@ -96,6 +97,7 @@ func (s *Server) ClientGetProfile(ctx context.Context, req *pb.ClientGetProfileR
 	}, nil
 }
 func (s *Server) ClientUpdateProfile(ctx context.Context, req *pb.ClientUpdateProfileRequest) (*pb.ClientUpdateProfileResponse, error) {
+
 	filter := bson.D{{"user_id", req.GetUserId()}}
 	update := bson.D{
 		{"$set", bson.D{
@@ -135,6 +137,7 @@ func (s *Server) TherapistUpdateProfile(ctx context.Context, req *pb.TherapistUp
 			{"email", req.GetEmail()},
 			{"gender", req.GetGender()},
 		}}}
+	fmt.Println()
 	_, error := s.H.TherapistCollection.UpdateOne(ctx, filter, update)
 
 	if error != nil {
@@ -154,7 +157,9 @@ func (s *Server) TherapistUpdateProfile(ctx context.Context, req *pb.TherapistUp
 
 func (s *Server) TherapistCreateProfile(ctx context.Context, req *pb.TherapistCreateProfileRequest) (*pb.TherapistCreateProfileResponse, error) {
 	data := &TherapistProfile{}
+	fmt.Println(req)
 	_ = s.H.TherapistCollection.FindOne(ctx, bson.D{{"user_id", req.GetUserId()}}).Decode(data)
+
 	if data.ID != primitive.NilObjectID {
 		return &pb.TherapistCreateProfileResponse{
 			Status: 400,
@@ -172,7 +177,7 @@ func (s *Server) TherapistCreateProfile(ctx context.Context, req *pb.TherapistCr
 	if error != nil {
 		return &pb.TherapistCreateProfileResponse{
 			Status: 400,
-			Result: "خطا در ثبت اطلاعات",
+			Result: error.Error(),
 		}, nil
 	}
 	return &pb.TherapistCreateProfileResponse{
@@ -204,16 +209,16 @@ func (s *Server) TherapistGetProfile(ctx context.Context, req *pb.TherapistGetPr
 	}, nil
 }
 
-//func (s *Server) GetFreeTime(ctx context.Context, req *pb.TherapistGetFreeTimeRequest) (*pb.TherapistGetFreeTimeResponse, error) {
+//func (s *Server) GetFreeTime(ctx context.Context, req *profilepb.TherapistGetFreeTimeRequest) (*profilepb.TherapistGetFreeTimeResponse, error) {
 //	data := &TherapistProfile{}
 //	_ = s.H.TherapistCollection.FindOne(ctx, bson.D{{"user_id", req.GetId()}}).Decode(data)
 //	if data.ID == primitive.NilObjectID {
-//		return &pb.TherapistGetFreeTimeResponse{
+//		return &profilepb.TherapistGetFreeTimeResponse{
 //			Status: 400,
 //			Result: "این کاربر قبلا ثبت نام نکرده است",
 //		}, nil
 //	}
-//	return &pb.TherapistGetFreeTimeResponse{
+//	return &profilepb.TherapistGetFreeTimeResponse{
 //		Status:   200,
 //		Result:   "success",
 //		FreeTime: data.FreeTime,
@@ -264,6 +269,7 @@ func (s *Server) GetFreeTime(ctx context.Context, req *pb.GetFreeTimeRequest) (*
 }
 func (s *Server) SetFreeTime(ctx context.Context, req *pb.TherapistSetFreeTimeRequest) (*pb.TherapistSetFreeTimeResponse, error) {
 	data := &TherapistProfile{}
+	fmt.Println(req)
 	_ = s.H.TherapistCollection.FindOne(ctx, bson.D{{"user_id", req.GetId()}}).Decode(data)
 	if data.ID == primitive.NilObjectID {
 		return &pb.TherapistSetFreeTimeResponse{
@@ -273,43 +279,51 @@ func (s *Server) SetFreeTime(ctx context.Context, req *pb.TherapistSetFreeTimeRe
 	}
 	var freeTimes []interface{}
 	freeTime := req.GetFreeTime()
+	s.H.FreeTimeCollection.DeleteMany(ctx, bson.D{{"id", data.UserId}})
+
 	for _, v := range freeTime {
-		//s.H.FreeTimeCollection.InsertOne(ctx, &FreeTime{
-		//	TherapistId: req.Id, Date: *v.Date,
-		//})
-		_ = append(freeTimes, &FreeTime{
-			Date:        Date{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour, Minute: v.Minute},
-			TherapistId: req.Id,
+		_, er := s.H.FreeTimeCollection.InsertOne(ctx, &FreeTime{
+			TherapistId: req.Id, Date: Date{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour, Minute: v.Minute},
 		})
+		//_ = append(freeTimes, &FreeTime{
+		//	Date:        Date{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour, Minute: v.Minute},
+		//	TherapistId: req.Id,
+		//})
+		if er != nil {
+			return &pb.TherapistSetFreeTimeResponse{
+				Status: 400,
+				Result: "خطا در ثبت زمان آزاد",
+			}, nil
+		}
 	}
 
-	s.H.FreeTimeCollection.DeleteMany(ctx, bson.D{{"id", data.UserId}})
-	_, error := s.H.FreeTimeCollection.InsertMany(ctx, freeTimes)
-	if error != nil {
-		return &pb.TherapistSetFreeTimeResponse{
-			Status: 400,
-			Result: "خطا در ثبت اطلاعات",
-		}, nil
-	}
+	fmt.Println(freeTimes)
+	//_, error := s.H.FreeTimeCollection.InsertMany(ctx, freeTimes)
+	//if error != nil {
+	//	return &pb.TherapistSetFreeTimeResponse{
+	//		Status: 400,
+	//		Result: error.Error(),
+	//	}, nil
+	//}
 	return &pb.TherapistSetFreeTimeResponse{
 		Status: 200,
 		Result: "اطلاعات با موفقیت ثبت شد",
 	}, nil
 }
 
-//func (s *Server) PhoneToken(ctx context.Context, req *pb.ClientPhoneTokenRequest) (*pb.ClientPhoneTokenResponse, error) {
+//func (s *Server) PhoneToken(ctx context.Context, req *profilepb.ClientPhoneTokenRequest) (*profilepb.ClientPhoneTokenResponse, error) {
 //	fmt.Println("ClientPhoneToken invoked %v", req)
 //	var smsVerify models.SmsVerify
 //
 //	if result := s.H.DB.Where(&models.SmsVerify{Phone: req.Phone}).First(&smsVerify); result.Error != nil {
-//		return &pb.ClientPhoneTokenResponse{
+//		return &profilepb.ClientPhoneTokenResponse{
 //			Result: "not found",
 //			Token:  "",
 //		}, nil
 //	}
 //
 //	if smsVerify.Code != req.Code {
-//		return &pb.ClientPhoneTokenResponse{
+//		return &profilepb.ClientPhoneTokenResponse{
 //			Result: "code not match",
 //			Token:  "",
 //		}, nil
@@ -319,18 +333,18 @@ func (s *Server) SetFreeTime(ctx context.Context, req *pb.TherapistSetFreeTimeRe
 //	user.ClientType = req.ClientType
 //	s.H.DB.Create(&user)
 //	token, _ := s.Jwt.GenerateToken(user)
-//	return &pb.ClientPhoneTokenResponse{
+//	return &profilepb.ClientPhoneTokenResponse{
 //		Result: "ok",
 //		Token:  token,
 //	}, nil
 //}
 //
-//func (s *Server) PhoneProof(ctx context.Context, req *pb.ClientPhoneProofRequest) (*pb.ClientPhoneProofResponse, error) {
+//func (s *Server) PhoneProof(ctx context.Context, req *profilepb.ClientPhoneProofRequest) (*profilepb.ClientPhoneProofResponse, error) {
 //
 //	fmt.Println("ClientPhoneProof invoked %v", req)
 //	var smsVerify models.SmsVerify
 //	if result := s.H.DB.Where(&models.User{Phone: req.Phone}).First(&smsVerify); result.Error == nil {
-//		return &pb.ClientPhoneProofResponse{
+//		return &profilepb.ClientPhoneProofResponse{
 //			Status: http.StatusConflict,
 //		}, nil
 //	}
@@ -360,15 +374,15 @@ func (s *Server) SetFreeTime(ctx context.Context, req *pb.TherapistSetFreeTimeRe
 //	}
 //	smsVerify.ExpireTime = time.Now().Add(time.Minute * 5)
 //	s.H.DB.Create(&smsVerify)
-//	return &pb.ClientPhoneProofResponse{
+//	return &profilepb.ClientPhoneProofResponse{
 //		Status: http.StatusCreated,
 //	}, nil
 //}
-//func (s *Server) ValidateToken(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
+//func (s *Server) ValidateToken(ctx context.Context, req *profilepb.ValidateRequest) (*profilepb.ValidateResponse, error) {
 //	claims, err := s.Jwt.ValidateToken(req.Token)
 //
 //	if err != nil {
-//		return &pb.ValidateResponse{
+//		return &profilepb.ValidateResponse{
 //			Status: http.StatusBadRequest,
 //			Error:  err.Error(),
 //		}, nil
@@ -377,13 +391,13 @@ func (s *Server) SetFreeTime(ctx context.Context, req *pb.TherapistSetFreeTimeRe
 //	var user models.User
 //
 //	if result := s.H.DB.Where(&models.User{Phone: claims.Phone}).First(&user); result.Error != nil {
-//		return &pb.ValidateResponse{
+//		return &profilepb.ValidateResponse{
 //			Status: http.StatusNotFound,
 //			Error:  "User not found",
 //		}, nil
 //	}
 //
-//	return &pb.ValidateResponse{
+//	return &profilepb.ValidateResponse{
 //		Status: http.StatusOK,
 //		UserId: user.Id,
 //	}, nil

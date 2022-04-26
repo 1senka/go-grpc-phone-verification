@@ -4,7 +4,7 @@
 // - protoc             v3.20.0
 // source: pkg/profilepb/profile.proto
 
-package pb
+package profilepb
 
 import (
 	context "context"
