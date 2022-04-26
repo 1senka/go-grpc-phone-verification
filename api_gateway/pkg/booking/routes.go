@@ -1,4 +1,4 @@
-package profile
+package booking
 
 import (
 	"github.com/1senka/go-grpc-api-gateway/pkg/auth"
@@ -14,9 +14,9 @@ func RegisterRoutes(r *gin.Engine, c *config.Config, authSvc *auth.ServiceClient
 		Client: InitServiceClient(c),
 	}
 
-	routes := r.Group("/profile")
+	routes := r.Group("/booking")
 	routes.Use(a.AuthRequired)
-	routes.POST("/", svc.BookNewSession)
+	routes.POST("/book", svc.BookNewSession)
 
 }
 func (svc *ServiceClient) BookNewSession(c *gin.Context) {

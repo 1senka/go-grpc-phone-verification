@@ -3,16 +3,17 @@ package services
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/1senka/go-grpc-auth-svc/pkg/db"
 	"github.com/1senka/go-grpc-auth-svc/pkg/models"
 	"github.com/1senka/go-grpc-auth-svc/pkg/pb"
 	"github.com/1senka/go-grpc-auth-svc/pkg/sms"
 	"github.com/1senka/go-grpc-auth-svc/pkg/utils"
 	"github.com/kavenegar/kavenegar-go"
-	"math/rand"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 var smsClient *kavenegar.Kavenegar
@@ -63,7 +64,7 @@ func (s *Server) PhoneProof(ctx context.Context, req *pb.ClientPhoneProofRequest
 	smsVerify.Phone = req.Phone
 	smsVerify.Code = strconv.Itoa(rand.Intn(99999999-10000000) + 10000000)
 	sender := "10008663"
-	receptor := []string{"09120357479"}
+	receptor := []string{req.Phone}
 	message := "کد تایید شما : " + smsVerify.Code
 	fmt.Println("moz")
 

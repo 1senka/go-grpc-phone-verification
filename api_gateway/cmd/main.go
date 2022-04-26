@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/1senka/go-grpc-api-gateway/pkg/auth"
+	"github.com/1senka/go-grpc-api-gateway/pkg/booking"
 	"github.com/1senka/go-grpc-api-gateway/pkg/config"
 	"github.com/1senka/go-grpc-api-gateway/pkg/profile"
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,7 @@ func main() {
 
 	authSvc := *auth.RegisterRoutes(r, &c)
 	profile.RegisterRoutes(r, &c, &authSvc)
+	booking.RegisterRoutes(r, &c, &authSvc)
 
 	r.Run(c.Port)
 }

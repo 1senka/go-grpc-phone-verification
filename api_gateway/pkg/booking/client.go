@@ -1,4 +1,4 @@
-package profile
+package booking
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type ServiceClient struct {
 
 func InitServiceClient(c *config.Config) pb.BookingServiceClient {
 	// using WithInsecure() because no SSL running
-	cc, err := grpc.Dial(c.ProfileSvcUrl, grpc.WithInsecure())
+	cc, err := grpc.Dial(c.BookingSvcUrl, grpc.WithInsecure())
 
 	if err != nil {
 		fmt.Println("Could not connect:", err)
