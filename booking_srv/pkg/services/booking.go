@@ -6,13 +6,17 @@ import (
 	"github.com/1senka/go-grpc-booking-svc/pkg/db"
 	"github.com/1senka/go-grpc-booking-svc/pkg/pb"
 	"github.com/1senka/go-grpc-booking-svc/pkg/profilepb"
+	"github.com/1senka/go-grpc-booking-svc/pkg/utils"
 	ptime "github.com/yaa110/go-persian-calendar"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"strconv"
+	"time"
 )
 
 //
 //var smsClient *kavenegar.Kavenegar
 //
+
 type Date struct {
 	Year   int32 `bson:"year"`
 	Month  int32 `bson:"month"`
@@ -68,17 +72,42 @@ type Server struct {
 }
 
 func (s *Server) Booking(ctx context.Context, req *pb.BookingRequest) (*pb.BookingResponse, error) {
-	time := ptime.Now()
-	fmt.Println(time)
+	year, month, day, hour, minute := ptime.Now().Year(), ptime.Now().Month().String(), ptime.Now().Day(), ptime.Now().Hour(), ptime.Now().Minute()
+	year2, month2, day2, hour2, minute2 := ptime.Now().Add(time.Duration(time.Hour*4)).Year(), ptime.Now().Month().String(), ptime.Now().Day(), ptime.Now().Hour(), ptime.Now().Minute()
+
+	fmt.Println(strconv.Itoa(year) + "/" + utils.GetMonthFromPersian(month) + "/" + strconv.Itoa(day) + "/" + strconv.Itoa(hour) + "/" + strconv.Itoa(minute))
+	ss, err := strconv.Atoi(utils.GetMonthFromPersian(month))
+	ss2, err2 := strconv.Atoi(utils.GetMonthFromPersian(month2))
+
+	if err == nil && err2 == nil {
+		startDate := &profilepb.Date{
+			Year:   int32(year),
+			Month:  int32(ss),
+			Day:    int32(day),
+			Hour:   int32(hour),
+			Minute: int32(minute),
+		}
+		endDate := &profilepb.Date{
+			Year:   int32(year2),
+			Month:  int32(ss2),
+			Day:    int32(day2),
+			Hour:   int32(hour2),
+			Minute: int32(minute2),
+		}
+		res, err3 := s.C.GetFreeTime(ctx, &profilepb.GetFreeTimeRequest{
+			StartDate: startDate,
+			EndDate:   endDate,
+		})
+		fmt.Println(res.FreeTimes)
+		if err3 != nil {
+			fmt.Println(err3.Error())
+		}
+	} else {
+		fmt.Println("error")
+	}
+
 	//res, err := s.C.GetFreeTime(ctx, &profilepb.GetFreeTimeRequest{
-	//	TherapistId: req.Ge,
-	//	Date: &pb.Date{
-	//		Year:   req.Date.Year,
-	//		Month:  req.Date.Month,
-	//		Day:    req.Date.Day,
-	//		Hour:   req.Date.Hour,
-	//		Minute: req.Date.Minute,
-	//	},
+	//	StartDate:
 	//})
 	return &pb.BookingResponse{BookingId: "", BookingStatus: "", UserId: "", SessionType: "", IsHotline: false, BookingTime: "", TherapistName: "", TherapistId: ""}, nil
 }

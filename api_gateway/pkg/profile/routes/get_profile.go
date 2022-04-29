@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"github.com/1senka/go-grpc-api-gateway/pkg/profile/pb"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -18,9 +19,10 @@ type GetProfileRequestBody struct {
 	ClientType string `json:"clientType"`
 }
 
-func GetProfile(ctx *gin.Context, c pb.ProfileServiceClient) {
+func GetProfile(ctx *gin.Context, c profilepb.ProfileServiceClient) {
 	body := GetProfileRequestBody{}
 	user_id, e := ctx.Get("userId")
+	fmt.Println(user_id)
 	if e == false {
 		ctx.AbortWithError(http.StatusBadRequest, nil)
 		return
@@ -29,8 +31,9 @@ func GetProfile(ctx *gin.Context, c pb.ProfileServiceClient) {
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
+
 	if body.ClientType == "client" {
-		resp, err := c.ClientGetProfile(ctx, &pb.ClientGetProfileRequest{UserId: user_id.(string)})
+		resp, err := c.ClientGetProfile(ctx, &profilepb.ClientGetProfileRequest{UserId: user_id.(string)})
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
@@ -38,7 +41,7 @@ func GetProfile(ctx *gin.Context, c pb.ProfileServiceClient) {
 		ctx.JSON(http.StatusOK, resp)
 	}
 	if body.ClientType == "therapist" {
-		resp, err := c.TherapistGetProfile(ctx, &pb.TherapistGetProfileRequest{Id: user_id.(string)})
+		resp, err := c.TherapistGetProfile(ctx, &profilepb.TherapistGetProfileRequest{Id: user_id.(string)})
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return

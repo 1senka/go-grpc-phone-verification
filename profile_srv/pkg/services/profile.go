@@ -45,11 +45,12 @@ type Server struct {
 	H db.Handler
 }
 
-func (s *Server) ClientCreateProfile(ctx context.Context, req *pb.ClientCreateProfileRequest) (*pb.ClientCreateProfileResponse, error) {
+func (s *Server) ClientCreateProfile(ctx context.Context, req *profilepb.ClientCreateProfileRequest) (*profilepb.ClientCreateProfileResponse, error) {
 	data := &ClientProfile{}
+	fmt.Println(req)
 	_ = s.H.ClientCollection.FindOne(ctx, bson.D{{"phone", req.GetPhone()}}).Decode(data)
 	if data.ID != primitive.NilObjectID {
-		return &pb.ClientCreateProfileResponse{
+		return &profilepb.ClientCreateProfileResponse{
 			Status: 400,
 			Result: "شماره موبایل وارد شده در سیستم ثبت شده است",
 		}, nil
@@ -63,30 +64,32 @@ func (s *Server) ClientCreateProfile(ctx context.Context, req *pb.ClientCreatePr
 		Gender:      req.GetGender(),
 	})
 	if error != nil {
-		return &pb.ClientCreateProfileResponse{
+		return &profilepb.ClientCreateProfileResponse{
 			Status: 400,
 			Result: "خطا در ثبت اطلاعات",
 		}, nil
 	}
-	return &pb.ClientCreateProfileResponse{
+	return &profilepb.ClientCreateProfileResponse{
 		Status: 200,
 		Result: "اطلاعات با موفقیت ثبت شد",
 	}, nil
 
 }
-func (s *Server) ClientGetProfile(ctx context.Context, req *pb.ClientGetProfileRequest) (*pb.ClientGetProfileResponse, error) {
+func (s *Server) ClientGetProfile(ctx context.Context, req *profilepb.ClientGetProfileRequest) (*profilepb.ClientGetProfileResponse, error) {
 	data := &ClientProfile{}
+	fmt.Println(req)
+
 	_ = s.H.ClientCollection.FindOne(ctx, bson.D{{"user_id", req.GetUserId()}}).Decode(data)
 	if data.ID == primitive.NilObjectID {
-		return &pb.ClientGetProfileResponse{
+		return &profilepb.ClientGetProfileResponse{
 			Status: 400,
 			Result: "این کاربر قبلا ثبت نام نکرده است",
 		}, nil
 	}
-	return &pb.ClientGetProfileResponse{
+	return &profilepb.ClientGetProfileResponse{
 		Status: 200,
 		Result: "اطلاعات با موفقیت دریافت شد",
-		Profile: &pb.Profile{
+		Profile: &profilepb.Profile{
 			UserId:    data.UserId,
 			Phone:     data.PhoneNumber,
 			Name:      data.Name,
@@ -96,7 +99,7 @@ func (s *Server) ClientGetProfile(ctx context.Context, req *pb.ClientGetProfileR
 		},
 	}, nil
 }
-func (s *Server) ClientUpdateProfile(ctx context.Context, req *pb.ClientUpdateProfileRequest) (*pb.ClientUpdateProfileResponse, error) {
+func (s *Server) ClientUpdateProfile(ctx context.Context, req *profilepb.ClientUpdateProfileRequest) (*profilepb.ClientUpdateProfileResponse, error) {
 
 	filter := bson.D{{"user_id", req.GetUserId()}}
 	update := bson.D{
@@ -112,19 +115,19 @@ func (s *Server) ClientUpdateProfile(ctx context.Context, req *pb.ClientUpdatePr
 		}}}
 	_, error := s.H.TherapistCollection.UpdateOne(ctx, filter, update)
 	if error != nil {
-		return &pb.ClientUpdateProfileResponse{
+		return &profilepb.ClientUpdateProfileResponse{
 			Status: 400,
 			Result: "خطا در بروزرسانی اطلاعات",
 		}, nil
 
 	}
-	return &pb.ClientUpdateProfileResponse{
+	return &profilepb.ClientUpdateProfileResponse{
 		Status: 200,
 		Result: "اطلاعات با موفقیت بروزرسانی شد",
 	}, nil
 
 }
-func (s *Server) TherapistUpdateProfile(ctx context.Context, req *pb.TherapistUpdateProfileRequest) (*pb.TherapistUpdateProfileResponse, error) {
+func (s *Server) TherapistUpdateProfile(ctx context.Context, req *profilepb.TherapistUpdateProfileRequest) (*profilepb.TherapistUpdateProfileResponse, error) {
 	filter := bson.D{{"user_id", req.GetUserId()}}
 	update := bson.D{
 		{"$set", bson.D{
@@ -141,27 +144,27 @@ func (s *Server) TherapistUpdateProfile(ctx context.Context, req *pb.TherapistUp
 	_, error := s.H.TherapistCollection.UpdateOne(ctx, filter, update)
 
 	if error != nil {
-		return &pb.TherapistUpdateProfileResponse{
+		return &profilepb.TherapistUpdateProfileResponse{
 			Status: 400,
 			Result: "خطا در ثبت اطلاعات",
 			Id:     req.GetUserId(),
 		}, nil
 
 	}
-	return &pb.TherapistUpdateProfileResponse{
+	return &profilepb.TherapistUpdateProfileResponse{
 		Status: 200,
 		Result: "اطلاعات با موفقیت ثبت شد",
 		Id:     req.GetUserId(),
 	}, nil
 }
 
-func (s *Server) TherapistCreateProfile(ctx context.Context, req *pb.TherapistCreateProfileRequest) (*pb.TherapistCreateProfileResponse, error) {
+func (s *Server) TherapistCreateProfile(ctx context.Context, req *profilepb.TherapistCreateProfileRequest) (*profilepb.TherapistCreateProfileResponse, error) {
 	data := &TherapistProfile{}
 	fmt.Println(req)
 	_ = s.H.TherapistCollection.FindOne(ctx, bson.D{{"user_id", req.GetUserId()}}).Decode(data)
 
 	if data.ID != primitive.NilObjectID {
-		return &pb.TherapistCreateProfileResponse{
+		return &profilepb.TherapistCreateProfileResponse{
 			Status: 400,
 			Result: "شماره موبایل وارد شده در سیستم ثبت شده است",
 		}, nil
@@ -175,30 +178,30 @@ func (s *Server) TherapistCreateProfile(ctx context.Context, req *pb.TherapistCr
 		Gender:      req.GetGender(),
 	})
 	if error != nil {
-		return &pb.TherapistCreateProfileResponse{
+		return &profilepb.TherapistCreateProfileResponse{
 			Status: 400,
 			Result: error.Error(),
 		}, nil
 	}
-	return &pb.TherapistCreateProfileResponse{
+	return &profilepb.TherapistCreateProfileResponse{
 		Status: 200,
 		Result: "اطلاعات با موفقیت ثبت شد",
 	}, nil
 
 }
-func (s *Server) TherapistGetProfile(ctx context.Context, req *pb.TherapistGetProfileRequest) (*pb.TherapistGetProfileResponse, error) {
+func (s *Server) TherapistGetProfile(ctx context.Context, req *profilepb.TherapistGetProfileRequest) (*profilepb.TherapistGetProfileResponse, error) {
 	data := &TherapistProfile{}
 	_ = s.H.TherapistCollection.FindOne(ctx, bson.D{{"user_id", req.GetId()}}).Decode(data)
 	if data.ID == primitive.NilObjectID {
-		return &pb.TherapistGetProfileResponse{
+		return &profilepb.TherapistGetProfileResponse{
 			Status: 400,
 			Result: "این کاربر قبلا ثبت نام نکرده است",
 		}, nil
 	}
-	return &pb.TherapistGetProfileResponse{
+	return &profilepb.TherapistGetProfileResponse{
 		Status: 200,
 		Result: "اطلاعات با موفقیت دریافت شد",
-		Profile: &pb.Profile{
+		Profile: &profilepb.Profile{
 			UserId:    data.UserId,
 			Phone:     data.PhoneNumber,
 			Name:      data.Name,
@@ -224,55 +227,73 @@ func (s *Server) TherapistGetProfile(ctx context.Context, req *pb.TherapistGetPr
 //		FreeTime: data.FreeTime,
 //	}, nil
 //}
-func (s *Server) GetTherapistFreeTime(ctx context.Context, req *pb.TherapistGetFreeTimeRequest) (*pb.TherapistGetFreeTimeResponse, error) {
-	data := []*pb.FreeTime{}
+func (s *Server) GetTherapistFreeTime(ctx context.Context, req *profilepb.TherapistGetFreeTimeRequest) (*profilepb.TherapistGetFreeTimeResponse, error) {
+	data := []*profilepb.FreeTime{}
 	cursor, error := s.H.FreeTimeCollection.Find(ctx, bson.D{{"therapist_id", req.GetId()}})
 	if error != nil {
-		return &pb.TherapistGetFreeTimeResponse{
+		return &profilepb.TherapistGetFreeTimeResponse{
 			Status:   400,
-			FreeTime: []*pb.FreeTime{},
+			FreeTime: []*profilepb.FreeTime{},
 		}, nil
 	}
 	for cursor.Next(ctx) {
 		var freeTime FreeTime
 		_ = cursor.Decode(&freeTime)
-		data = append(data, &pb.FreeTime{Date: &pb.Date{Year: freeTime.Date.Year, Month: freeTime.Date.Month, Day: freeTime.Date.Day, Hour: freeTime.Date.Hour, Minute: freeTime.Date.Minute},
+		data = append(data, &profilepb.FreeTime{Date: &profilepb.Date{Year: freeTime.Date.Year, Month: freeTime.Date.Month, Day: freeTime.Date.Day, Hour: freeTime.Date.Hour, Minute: freeTime.Date.Minute},
 			TherapistId: freeTime.TherapistId,
 		})
 	}
-	return &pb.TherapistGetFreeTimeResponse{
+	return &profilepb.TherapistGetFreeTimeResponse{
 		Status:   200,
 		FreeTime: data,
 	}, nil
 
 }
-func (s *Server) GetFreeTime(ctx context.Context, req *pb.GetFreeTimeRequest) (*pb.GetFreeTimeResponse, error) {
-	data := []*pb.FreeTime{}
-	cursor, error := s.H.FreeTimeCollection.Find(ctx, bson.D{{req.GetKeyword().Key, req.GetKeyword().Value}})
+func (s *Server) GetFreeTime(ctx context.Context, req *profilepb.GetFreeTimeRequest) (*profilepb.GetFreeTimeResponse, error) {
+	data := []*profilepb.FreeTime{}
+
+	startDate := profilepb.Date{
+		Year:   req.GetStartDate().GetYear(),
+		Month:  req.GetStartDate().GetMonth(),
+		Day:    req.GetStartDate().GetDay(),
+		Hour:   req.GetStartDate().GetHour(),
+		Minute: req.GetStartDate().GetMinute(),
+	}
+	//endDate := profilepb.Date{
+	//	Year:   req.GetEndDate().GetYear(),
+	//	Month:  req.GetEndDate().GetMonth(),
+	//	Day:    req.GetEndDate().GetDay(),
+	//	Hour:   req.GetEndDate().GetHour(),
+	//	Minute: req.GetEndDate().GetMinute(),
+	//}
+	date1 := bson.D{{"date.year", startDate.Year}, {"date.month", startDate.Month}}
+	fmt.Println(startDate)
+	fmt.Println(date1)
+	cursor, error := s.H.FreeTimeCollection.Find(ctx, date1)
 	if error != nil {
-		return &pb.GetFreeTimeResponse{
+		return &profilepb.GetFreeTimeResponse{
 			Status:    400,
-			FreeTimes: []*pb.FreeTime{},
+			FreeTimes: []*profilepb.FreeTime{},
 		}, nil
 	}
 	for cursor.Next(ctx) {
 		var freeTime FreeTime
 		_ = cursor.Decode(&freeTime)
-		data = append(data, &pb.FreeTime{Date: &pb.Date{Year: freeTime.Date.Year, Month: freeTime.Date.Month, Day: freeTime.Date.Day, Hour: freeTime.Date.Hour, Minute: freeTime.Date.Minute},
+		data = append(data, &profilepb.FreeTime{Date: &profilepb.Date{Year: freeTime.Date.Year, Month: freeTime.Date.Month, Day: freeTime.Date.Day, Hour: freeTime.Date.Hour, Minute: freeTime.Date.Minute},
 			TherapistId: freeTime.TherapistId,
 		})
 	}
-	return &pb.GetFreeTimeResponse{
+	return &profilepb.GetFreeTimeResponse{
 		Status:    200,
 		FreeTimes: data,
 	}, nil
 }
-func (s *Server) SetFreeTime(ctx context.Context, req *pb.TherapistSetFreeTimeRequest) (*pb.TherapistSetFreeTimeResponse, error) {
+func (s *Server) SetFreeTime(ctx context.Context, req *profilepb.TherapistSetFreeTimeRequest) (*profilepb.TherapistSetFreeTimeResponse, error) {
 	data := &TherapistProfile{}
 	fmt.Println(req)
 	_ = s.H.TherapistCollection.FindOne(ctx, bson.D{{"user_id", req.GetId()}}).Decode(data)
 	if data.ID == primitive.NilObjectID {
-		return &pb.TherapistSetFreeTimeResponse{
+		return &profilepb.TherapistSetFreeTimeResponse{
 			Status: 400,
 			Result: "این کاربر قبلا ثبت نام نکرده است",
 		}, nil
@@ -290,7 +311,7 @@ func (s *Server) SetFreeTime(ctx context.Context, req *pb.TherapistSetFreeTimeRe
 		//	TherapistId: req.Id,
 		//})
 		if er != nil {
-			return &pb.TherapistSetFreeTimeResponse{
+			return &profilepb.TherapistSetFreeTimeResponse{
 				Status: 400,
 				Result: "خطا در ثبت زمان آزاد",
 			}, nil
@@ -305,7 +326,7 @@ func (s *Server) SetFreeTime(ctx context.Context, req *pb.TherapistSetFreeTimeRe
 	//		Result: error.Error(),
 	//	}, nil
 	//}
-	return &pb.TherapistSetFreeTimeResponse{
+	return &profilepb.TherapistSetFreeTimeResponse{
 		Status: 200,
 		Result: "اطلاعات با موفقیت ثبت شد",
 	}, nil

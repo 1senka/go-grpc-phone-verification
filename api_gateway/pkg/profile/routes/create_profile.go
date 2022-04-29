@@ -19,7 +19,7 @@ type CreateProfileRequestBody struct {
 	userId     string `json:"userId"`
 }
 
-func CreateProfile(ctx *gin.Context, c pb.ProfileServiceClient) {
+func CreateProfile(ctx *gin.Context, c profilepb.ProfileServiceClient) {
 	body := CreateProfileRequestBody{}
 
 	if err := ctx.BindJSON(&body); err != nil {
@@ -32,9 +32,10 @@ func CreateProfile(ctx *gin.Context, c pb.ProfileServiceClient) {
 		ctx.AbortWithError(http.StatusBadRequest, nil)
 		return
 	}
+	fmt.Println(body)
 
 	if body.ClientType == "client" {
-		res, err := c.ClientCreateProfile(context.Background(), &pb.ClientCreateProfileRequest{
+		res, err := c.ClientCreateProfile(context.Background(), &profilepb.ClientCreateProfileRequest{
 			Name:      body.Name,
 			Phone:     body.Phone,
 			Email:     body.Email,
@@ -50,7 +51,7 @@ func CreateProfile(ctx *gin.Context, c pb.ProfileServiceClient) {
 		ctx.JSON(http.StatusCreated, &res)
 	}
 	if body.ClientType == "therapist" {
-		res, err := c.TherapistCreateProfile(context.Background(), &pb.TherapistCreateProfileRequest{
+		res, err := c.TherapistCreateProfile(context.Background(), &profilepb.TherapistCreateProfileRequest{
 			Name:      body.Name,
 			Phone:     body.Phone,
 			Email:     body.Email,

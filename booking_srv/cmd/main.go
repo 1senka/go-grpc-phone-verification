@@ -29,7 +29,7 @@ func main() {
 	if err != nil {
 		log.Fatalln("Failed to listing:", err)
 	}
-	conn, err := grpc.Dial("localhost:5000", grpc.WithInsecure())
+	conn, err := grpc.Dial(c.ProfileUrl, grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}

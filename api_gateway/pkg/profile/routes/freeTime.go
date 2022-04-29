@@ -22,7 +22,7 @@ type FreeTimes struct {
 	FreeTimes []FreeTime `json:"free_times"`
 }
 
-func SetFreeTime(ctx *gin.Context, c pb.ProfileServiceClient) {
+func SetFreeTime(ctx *gin.Context, c profilepb.ProfileServiceClient) {
 	body := FreeTimes{}
 	user_id, e := ctx.Get("userId")
 	if e == false {
@@ -33,9 +33,9 @@ func SetFreeTime(ctx *gin.Context, c pb.ProfileServiceClient) {
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	freeTimes := []*pb.Date{}
+	freeTimes := []*profilepb.Date{}
 	for _, freeTime := range body.FreeTimes {
-		freeTimes = append(freeTimes, &pb.Date{
+		freeTimes = append(freeTimes, &profilepb.Date{
 			Year:   freeTime.Date.Year,
 			Month:  freeTime.Date.Month,
 			Day:    freeTime.Date.Day,
@@ -43,7 +43,7 @@ func SetFreeTime(ctx *gin.Context, c pb.ProfileServiceClient) {
 			Minute: freeTime.Date.Minute,
 		})
 	}
-	res, err := c.SetFreeTime(ctx, &pb.TherapistSetFreeTimeRequest{
+	res, err := c.SetFreeTime(ctx, &profilepb.TherapistSetFreeTimeRequest{
 		FreeTime: freeTimes,
 		Id:       fmt.Sprintf("%v", user_id),
 	})
@@ -55,13 +55,13 @@ func SetFreeTime(ctx *gin.Context, c pb.ProfileServiceClient) {
 
 }
 
-func GetTherapistFreeTime(ctx *gin.Context, c pb.ProfileServiceClient) {
+func GetTherapistFreeTime(ctx *gin.Context, c profilepb.ProfileServiceClient) {
 	user_id, e := ctx.Get("userId")
 	if e == false {
 		ctx.AbortWithError(http.StatusBadRequest, nil)
 		return
 	}
-	res, err := c.GetTherapistFreeTime(ctx, &pb.TherapistGetFreeTimeRequest{
+	res, err := c.GetTherapistFreeTime(ctx, &profilepb.TherapistGetFreeTimeRequest{
 		Id: fmt.Sprintf("%v", user_id),
 	})
 	if err != nil {
@@ -71,7 +71,7 @@ func GetTherapistFreeTime(ctx *gin.Context, c pb.ProfileServiceClient) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-//func CreateProfile(ctx *gin.Context, c profilepb.ProfileServiceClient) {
+//func CreateProfile(ctx *gin.Context, c profileprofilepb.ProfileServiceClient) {
 //	body := CreateProfileRequestBody{}
 //
 //	if err := ctx.BindJSON(&body); err != nil {

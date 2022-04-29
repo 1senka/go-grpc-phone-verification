@@ -18,7 +18,7 @@ type UpdateProfileRequestBody struct {
 	BirthDate  string `json:"birthDate"`
 }
 
-func UpdateProfile(ctx *gin.Context, c pb.ProfileServiceClient) {
+func UpdateProfile(ctx *gin.Context, c profilepb.ProfileServiceClient) {
 	id, _ := strconv.ParseInt(ctx.Param("id"), 10, 32)
 	body := UpdateProfileRequestBody{}
 
@@ -28,7 +28,7 @@ func UpdateProfile(ctx *gin.Context, c pb.ProfileServiceClient) {
 	}
 
 	if body.ClientType == "client" {
-		res, err := c.ClientUpdateProfile(context.Background(), &pb.ClientUpdateProfileRequest{
+		res, err := c.ClientUpdateProfile(context.Background(), &profilepb.ClientUpdateProfileRequest{
 			UserId: string(id),
 			Name:   body.Name,
 			Phone:  body.Phone,
@@ -42,7 +42,7 @@ func UpdateProfile(ctx *gin.Context, c pb.ProfileServiceClient) {
 
 	}
 	if body.ClientType == "therapist" {
-		res, err := c.TherapistUpdateProfile(context.Background(), &pb.TherapistUpdateProfileRequest{
+		res, err := c.TherapistUpdateProfile(context.Background(), &profilepb.TherapistUpdateProfileRequest{
 			UserId: string(id),
 			Name:   body.Name,
 			Phone:  body.Phone,
@@ -54,7 +54,7 @@ func UpdateProfile(ctx *gin.Context, c pb.ProfileServiceClient) {
 		}
 		ctx.JSON(http.StatusCreated, &res)
 	}
-	//res, err := c.FindOne(context.Background(), &profilepb.FindOneRequest{
+	//res, err := c.FindOne(context.Background(), &profileprofilepb.FindOneRequest{
 	//	Id: int64(id),
 	//})
 	//
