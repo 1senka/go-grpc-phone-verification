@@ -2,7 +2,7 @@ package routes
 
 import (
 	"fmt"
-	"github.com/1senka/go-grpc-api-gateway/pkg/profile/pb"
+	"github.com/1senka/go-grpc-api-gateway/pkg/booking/pb"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -22,7 +22,7 @@ type FreeTimes struct {
 	FreeTimes []FreeTime `json:"free_times"`
 }
 
-func SetFreeTime(ctx *gin.Context, c profilepb.ProfileServiceClient) {
+func SetFreeTime(ctx *gin.Context, c pb.BookingServiceClient) {
 	body := FreeTimes{}
 	user_id, e := ctx.Get("userId")
 	if e == false {
@@ -33,9 +33,9 @@ func SetFreeTime(ctx *gin.Context, c profilepb.ProfileServiceClient) {
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	freeTimes := []*profilepb.Date{}
+	freeTimes := []*pb.Date{}
 	for _, freeTime := range body.FreeTimes {
-		freeTimes = append(freeTimes, &profilepb.Date{
+		freeTimes = append(freeTimes, &pb.Date{
 			Year:   freeTime.Date.Year,
 			Month:  freeTime.Date.Month,
 			Day:    freeTime.Date.Day,
@@ -43,7 +43,7 @@ func SetFreeTime(ctx *gin.Context, c profilepb.ProfileServiceClient) {
 			Minute: freeTime.Date.Minute,
 		})
 	}
-	res, err := c.SetFreeTime(ctx, &profilepb.TherapistSetFreeTimeRequest{
+	res, err := c.SetFreeTime(ctx, &pb.TherapistSetFreeTimeRequest{
 		FreeTime: freeTimes,
 		Id:       fmt.Sprintf("%v", user_id),
 	})
@@ -55,13 +55,13 @@ func SetFreeTime(ctx *gin.Context, c profilepb.ProfileServiceClient) {
 
 }
 
-func GetTherapistFreeTime(ctx *gin.Context, c profilepb.ProfileServiceClient) {
+func GetTherapistFreeTime(ctx *gin.Context, c pb.BookingServiceClient) {
 	user_id, e := ctx.Get("userId")
 	if e == false {
 		ctx.AbortWithError(http.StatusBadRequest, nil)
 		return
 	}
-	res, err := c.GetTherapistFreeTime(ctx, &profilepb.TherapistGetFreeTimeRequest{
+	res, err := c.GetTherapistFreeTime(ctx, &pb.TherapistGetFreeTimeRequest{
 		Id: fmt.Sprintf("%v", user_id),
 	})
 	if err != nil {

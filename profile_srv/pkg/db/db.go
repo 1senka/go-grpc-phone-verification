@@ -12,12 +12,10 @@ import (
 
 var ClientCollection *mongo.Collection
 var TherapistCollection *mongo.Collection
-var FreeTimeCollection *mongo.Collection
 
 type Handler struct {
 	ClientCollection    *mongo.Collection
 	TherapistCollection *mongo.Collection
-	FreeTimeCollection  *mongo.Collection
 }
 
 func Init(url string) Handler {
@@ -39,6 +37,5 @@ func Init(url string) Handler {
 	fmt.Println(client.ListDatabaseNames(ctx, bson.M{}))
 	ClientCollection = client.Database("psycology").Collection("client")
 	TherapistCollection = client.Database("psycology").Collection("therapist")
-	FreeTimeCollection = client.Database("psycology").Collection("freetime")
-	return Handler{ClientCollection: ClientCollection, TherapistCollection: TherapistCollection, FreeTimeCollection: FreeTimeCollection}
+	return Handler{ClientCollection: ClientCollection, TherapistCollection: TherapistCollection}
 }

@@ -93,44 +93,13 @@ message TherapistGetProfileResponse {
   Profile profile = 2;
 }
 
-message TherapistGetFreeTimeRequest{
-  string id = 1;
-}
-message TherapistGetFreeTimeResponse{
-  int32 status = 3;
-  repeated FreeTime free_time = 2;
-}
-message TherapistSetFreeTimeRequest{
-  string id = 1;
-  repeated Date free_time = 2;
-}
-message TherapistSetFreeTimeResponse{
-  int32 status = 2;
-  string result = 1;
-}
 
-message FreeTime{
-   Date date = 1;
-
-   string therapist_id = 2;
-}
-message GetFreeTimeRequest{
-  Date startDate = 1;
-  Date endDate = 2;
-}
-message GetFreeTimeResponse{
-  string result = 1;
-  int32 status = 2;
-  repeated FreeTime free_times = 3;
-}
 service ProfileService {
   rpc ClientCreateProfile(ClientCreateProfileRequest) returns (ClientCreateProfileResponse);
   rpc ClientGetProfile(ClientGetProfileRequest) returns (ClientGetProfileResponse);
   rpc TherapistCreateProfile(TherapistCreateProfileRequest) returns (TherapistCreateProfileResponse);
   rpc TherapistGetProfile(TherapistGetProfileRequest) returns (TherapistGetProfileResponse);
-  rpc GetTherapistFreeTime(TherapistGetFreeTimeRequest) returns (TherapistGetFreeTimeResponse);
-  rpc SetFreeTime(TherapistSetFreeTimeRequest) returns (TherapistSetFreeTimeResponse);
-  rpc GetFreeTime(GetFreeTimeRequest) returns (GetFreeTimeResponse);
+
   rpc ClientUpdateProfile(ClientUpdateProfileRequest) returns (ClientUpdateProfileResponse);
   rpc TherapistUpdateProfile(TherapistUpdateProfileRequest) returns (TherapistUpdateProfileResponse);
 }

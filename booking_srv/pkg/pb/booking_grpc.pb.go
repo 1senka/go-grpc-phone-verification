@@ -80,7 +80,7 @@ type BookingServiceServer interface {
 	GetBookingList(context.Context, *GetBookingListRequest) (*GetBookingListResponse, error)
 	GetTherapistFreeTime(context.Context, *TherapistGetFreeTimeRequest) (*TherapistGetFreeTimeResponse, error)
 	SetFreeTime(context.Context, *TherapistSetFreeTimeRequest) (*TherapistSetFreeTimeResponse, error)
-	mustEmbedUnimplementedBookingServiceServer()
+	// mustEmbedUnimplementedBookingServiceServer()
 }
 
 // UnimplementedBookingServiceServer must be embedded to have forward compatible implementations.

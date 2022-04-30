@@ -102,7 +102,7 @@ type ProfileServiceServer interface {
 	TherapistGetProfile(context.Context, *TherapistGetProfileRequest) (*TherapistGetProfileResponse, error)
 	ClientUpdateProfile(context.Context, *ClientUpdateProfileRequest) (*ClientUpdateProfileResponse, error)
 	TherapistUpdateProfile(context.Context, *TherapistUpdateProfileRequest) (*TherapistUpdateProfileResponse, error)
-	mustEmbedUnimplementedProfileServiceServer()
+	//mustEmbedUnimplementedProfileServiceServer()
 }
 
 // UnimplementedProfileServiceServer must be embedded to have forward compatible implementations.

@@ -8,11 +8,11 @@ import (
 	"github.com/1senka/go-grpc-booking-svc/pkg/db"
 	"github.com/1senka/go-grpc-booking-svc/pkg/pb"
 
-	"github.com/1senka/go-grpc-booking-svc/pkg/profilepb"
-	"github.com/1senka/go-grpc-booking-svc/pkg/services"
-	"google.golang.org/grpc"
 	"log"
 	"net"
+
+	"github.com/1senka/go-grpc-booking-svc/pkg/services"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -34,14 +34,12 @@ func main() {
 		panic(err)
 	}
 	defer conn.Close()
-	cc := profilepb.NewProfileServiceClient(conn)
 	fmt.Println("created client ", c)
 	fmt.Println("Booking Svc on", c.Port)
 
 	s := services.Server{
 		H: h,
 		//Sms: ss,
-		C: cc,
 	}
 
 	grpcServer := grpc.NewServer()

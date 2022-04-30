@@ -19,8 +19,6 @@ func RegisterRoutes(r *gin.Engine, c *config.Config, authSvc *auth.ServiceClient
 	routes.POST("/", svc.CreateProfile)
 	routes.GET("/", svc.GetProfile)
 	routes.PUT("/", svc.UpdateProfile)
-	routes.GET("/freeTime", svc.GetTherapistFreeTime)
-	routes.POST("/setTime", svc.SetFreeTime)
 
 }
 
@@ -32,12 +30,6 @@ func (svc *ServiceClient) UpdateProfile(ctx *gin.Context) {
 	routes.UpdateProfile(ctx, svc.Client)
 }
 
-func (svc *ServiceClient) GetTherapistFreeTime(ctx *gin.Context) {
-	routes.GetTherapistFreeTime(ctx, svc.Client)
-}
-func (svc *ServiceClient) SetFreeTime(ctx *gin.Context) {
-	routes.SetFreeTime(ctx, svc.Client)
-}
 func (svc *ServiceClient) GetProfile(ctx *gin.Context) {
 	routes.GetProfile(ctx, svc.Client)
 }

@@ -35,6 +35,34 @@ message GetBookingListRequest {
   string userId =1;
 
 }
+message TherapistGetFreeTimeRequest{
+  string id = 1;
+}
+message TherapistGetFreeTimeResponse{
+  int32 status = 3;
+  repeated FreeTime free_time = 2;
+}
+message Date {
+  int32 year = 1;
+  int32 month = 2;
+  int32 day = 3;
+  int32 hour = 4;
+  int32 minute = 5;
+}
+message TherapistSetFreeTimeRequest{
+  string id = 1;
+  repeated Date free_time = 2;
+}
+message TherapistSetFreeTimeResponse{
+  int32 status = 2;
+  string result = 1;
+}
+
+message FreeTime{
+  Date date = 1;
+
+  string therapist_id = 2;
+}
 
 message GetBookingListResponse {
   repeated Booking bookings =1;
@@ -43,5 +71,7 @@ message GetBookingListResponse {
 service BookingService {
   rpc Booking(BookingRequest) returns (BookingResponse);
   rpc GetBookingList(GetBookingListRequest) returns (GetBookingListResponse);
+  rpc GetTherapistFreeTime(TherapistGetFreeTimeRequest) returns (TherapistGetFreeTimeResponse);
+  rpc SetFreeTime(TherapistSetFreeTimeRequest) returns (TherapistSetFreeTimeResponse);
 
 }

@@ -43,6 +43,6 @@ func (c *AuthMiddlewareConfig) AuthRequired(ctx *gin.Context) {
 	}
 
 	ctx.Set("userId", strconv.Itoa(int(res.UserId)))
-
+	ctx.Set("phone", res.Phone)
 	ctx.Next()
 }

@@ -3,8 +3,9 @@ package services
 import (
 	"context"
 	"fmt"
+
 	"github.com/1senka/go-grpc-profile-svc/pkg/db"
-	"github.com/1senka/go-grpc-profile-svc/pkg/pb"
+	profilepb "github.com/1senka/go-grpc-profile-svc/pkg/pb"
 	"github.com/kavenegar/kavenegar-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -48,7 +49,8 @@ type Server struct {
 func (s *Server) ClientCreateProfile(ctx context.Context, req *profilepb.ClientCreateProfileRequest) (*profilepb.ClientCreateProfileResponse, error) {
 	data := &ClientProfile{}
 	fmt.Println(req)
-	_ = s.H.ClientCollection.FindOne(ctx, bson.D{{"phone", req.GetPhone()}}).Decode(data)
+	phone, _ := ctx.Value("phone").(string)
+	_ = s.H.ClientCollection.FindOne(ctx, bson.D{{"phone_number", req.GetPhone()}}).Decode(data)
 	if data.ID != primitive.NilObjectID {
 		return &profilepb.ClientCreateProfileResponse{
 			Status: 400,
@@ -57,7 +59,7 @@ func (s *Server) ClientCreateProfile(ctx context.Context, req *profilepb.ClientC
 	}
 	_, error := s.H.ClientCollection.InsertOne(ctx, &ClientProfile{
 		UserId:      req.GetUserId(),
-		PhoneNumber: req.GetPhone(),
+		PhoneNumber: phone,
 		Name:        req.GetName(),
 		BirthDate:   req.GetBirthdate(),
 		Email:       req.GetEmail(),
@@ -227,110 +229,46 @@ func (s *Server) TherapistGetProfile(ctx context.Context, req *profilepb.Therapi
 //		FreeTime: data.FreeTime,
 //	}, nil
 //}
-func (s *Server) GetTherapistFreeTime(ctx context.Context, req *profilepb.TherapistGetFreeTimeRequest) (*profilepb.TherapistGetFreeTimeResponse, error) {
-	data := []*profilepb.FreeTime{}
-	cursor, error := s.H.FreeTimeCollection.Find(ctx, bson.D{{"therapist_id", req.GetId()}})
-	if error != nil {
-		return &profilepb.TherapistGetFreeTimeResponse{
-			Status:   400,
-			FreeTime: []*profilepb.FreeTime{},
-		}, nil
-	}
-	for cursor.Next(ctx) {
-		var freeTime FreeTime
-		_ = cursor.Decode(&freeTime)
-		data = append(data, &profilepb.FreeTime{Date: &profilepb.Date{Year: freeTime.Date.Year, Month: freeTime.Date.Month, Day: freeTime.Date.Day, Hour: freeTime.Date.Hour, Minute: freeTime.Date.Minute},
-			TherapistId: freeTime.TherapistId,
-		})
-	}
-	return &profilepb.TherapistGetFreeTimeResponse{
-		Status:   200,
-		FreeTime: data,
-	}, nil
 
-}
-func (s *Server) GetFreeTime(ctx context.Context, req *profilepb.GetFreeTimeRequest) (*profilepb.GetFreeTimeResponse, error) {
-	data := []*profilepb.FreeTime{}
-
-	startDate := profilepb.Date{
-		Year:   req.GetStartDate().GetYear(),
-		Month:  req.GetStartDate().GetMonth(),
-		Day:    req.GetStartDate().GetDay(),
-		Hour:   req.GetStartDate().GetHour(),
-		Minute: req.GetStartDate().GetMinute(),
-	}
-	//endDate := profilepb.Date{
-	//	Year:   req.GetEndDate().GetYear(),
-	//	Month:  req.GetEndDate().GetMonth(),
-	//	Day:    req.GetEndDate().GetDay(),
-	//	Hour:   req.GetEndDate().GetHour(),
-	//	Minute: req.GetEndDate().GetMinute(),
-	//}
-	date1 := bson.D{{"date.year", startDate.Year}, {"date.month", startDate.Month}}
-	fmt.Println(startDate)
-	fmt.Println(date1)
-	cursor, error := s.H.FreeTimeCollection.Find(ctx, date1)
-	if error != nil {
-		return &profilepb.GetFreeTimeResponse{
-			Status:    400,
-			FreeTimes: []*profilepb.FreeTime{},
-		}, nil
-	}
-	for cursor.Next(ctx) {
-		var freeTime FreeTime
-		_ = cursor.Decode(&freeTime)
-		data = append(data, &profilepb.FreeTime{Date: &profilepb.Date{Year: freeTime.Date.Year, Month: freeTime.Date.Month, Day: freeTime.Date.Day, Hour: freeTime.Date.Hour, Minute: freeTime.Date.Minute},
-			TherapistId: freeTime.TherapistId,
-		})
-	}
-	return &profilepb.GetFreeTimeResponse{
-		Status:    200,
-		FreeTimes: data,
-	}, nil
-}
-func (s *Server) SetFreeTime(ctx context.Context, req *profilepb.TherapistSetFreeTimeRequest) (*profilepb.TherapistSetFreeTimeResponse, error) {
-	data := &TherapistProfile{}
-	fmt.Println(req)
-	_ = s.H.TherapistCollection.FindOne(ctx, bson.D{{"user_id", req.GetId()}}).Decode(data)
-	if data.ID == primitive.NilObjectID {
-		return &profilepb.TherapistSetFreeTimeResponse{
-			Status: 400,
-			Result: "این کاربر قبلا ثبت نام نکرده است",
-		}, nil
-	}
-	var freeTimes []interface{}
-	freeTime := req.GetFreeTime()
-	s.H.FreeTimeCollection.DeleteMany(ctx, bson.D{{"id", data.UserId}})
-
-	for _, v := range freeTime {
-		_, er := s.H.FreeTimeCollection.InsertOne(ctx, &FreeTime{
-			TherapistId: req.Id, Date: Date{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour, Minute: v.Minute},
-		})
-		//_ = append(freeTimes, &FreeTime{
-		//	Date:        Date{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour, Minute: v.Minute},
-		//	TherapistId: req.Id,
-		//})
-		if er != nil {
-			return &profilepb.TherapistSetFreeTimeResponse{
-				Status: 400,
-				Result: "خطا در ثبت زمان آزاد",
-			}, nil
-		}
-	}
-
-	fmt.Println(freeTimes)
-	//_, error := s.H.FreeTimeCollection.InsertMany(ctx, freeTimes)
-	//if error != nil {
-	//	return &pb.TherapistSetFreeTimeResponse{
-	//		Status: 400,
-	//		Result: error.Error(),
-	//	}, nil
-	//}
-	return &profilepb.TherapistSetFreeTimeResponse{
-		Status: 200,
-		Result: "اطلاعات با موفقیت ثبت شد",
-	}, nil
-}
+//func (s *Server) GetFreeTime(ctx context.Context, req *profilepb.GetFreeTimeRequest) (*profilepb.GetFreeTimeResponse, error) {
+//	data := []*profilepb.FreeTime{}
+//
+//	startDate := profilepb.Date{
+//		Year:   req.GetStartDate().GetYear(),
+//		Month:  req.GetStartDate().GetMonth(),
+//		Day:    req.GetStartDate().GetDay(),
+//		Hour:   req.GetStartDate().GetHour(),
+//		Minute: req.GetStartDate().GetMinute(),
+//	}
+//	//endDate := profilepb.Date{
+//	//	Year:   req.GetEndDate().GetYear(),
+//	//	Month:  req.GetEndDate().GetMonth(),
+//	//	Day:    req.GetEndDate().GetDay(),
+//	//	Hour:   req.GetEndDate().GetHour(),
+//	//	Minute: req.GetEndDate().GetMinute(),
+//	//}
+//	date1 := bson.D{{"date.year", startDate.Year}, {"date.month", startDate.Month}}
+//	fmt.Println(startDate)
+//	fmt.Println(date1)
+//	cursor, error := s.H.FreeTimeCollection.Find(ctx, date1)
+//	if error != nil {
+//		return &profilepb.GetFreeTimeResponse{
+//			Status:    400,
+//			FreeTimes: []*profilepb.FreeTime{},
+//		}, nil
+//	}
+//	for cursor.Next(ctx) {
+//		var freeTime FreeTime
+//		_ = cursor.Decode(&freeTime)
+//		data = append(data, &profilepb.FreeTime{Date: &profilepb.Date{Year: freeTime.Date.Year, Month: freeTime.Date.Month, Day: freeTime.Date.Day, Hour: freeTime.Date.Hour, Minute: freeTime.Date.Minute},
+//			TherapistId: freeTime.TherapistId,
+//		})
+//	}
+//	return &profilepb.GetFreeTimeResponse{
+//		Status:    200,
+//		FreeTimes: data,
+//	}, nil
+//}
 
 //func (s *Server) PhoneToken(ctx context.Context, req *profilepb.ClientPhoneTokenRequest) (*profilepb.ClientPhoneTokenResponse, error) {
 //	fmt.Println("ClientPhoneToken invoked %v", req)

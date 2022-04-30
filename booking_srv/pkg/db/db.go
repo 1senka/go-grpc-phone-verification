@@ -9,9 +9,11 @@ import (
 )
 
 var SessionCollection *mongo.Collection
+var FreeTimeCollection *mongo.Collection
 
 type Handler struct {
-	SessionCollection *mongo.Collection
+	SessionCollection  *mongo.Collection
+	FreeTimeCollection *mongo.Collection
 }
 
 func Init(url string) Handler {
@@ -30,6 +32,7 @@ func Init(url string) Handler {
 		log.Fatalln(err)
 	}
 	SessionCollection = db.Database("booking").Collection("session")
+	FreeTimeCollection = db.Database("psycology").Collection("freetime")
 
-	return Handler{SessionCollection: SessionCollection}
+	return Handler{SessionCollection: SessionCollection, FreeTimeCollection: FreeTimeCollection}
 }

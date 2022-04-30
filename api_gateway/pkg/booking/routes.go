@@ -17,8 +17,15 @@ func RegisterRoutes(r *gin.Engine, c *config.Config, authSvc *auth.ServiceClient
 	routes := r.Group("/booking")
 	routes.Use(a.AuthRequired)
 	routes.POST("/book", svc.BookNewSession)
-
+	routes.GET("/freeTime", svc.GetTherapistFreeTime)
+	routes.POST("/setTime", svc.SetFreeTime)
 }
 func (svc *ServiceClient) BookNewSession(c *gin.Context) {
 	routes.BookSession(c, svc.Client)
+}
+func (svc *ServiceClient) GetTherapistFreeTime(ctx *gin.Context) {
+	routes.GetTherapistFreeTime(ctx, svc.Client)
+}
+func (svc *ServiceClient) SetFreeTime(ctx *gin.Context) {
+	routes.SetFreeTime(ctx, svc.Client)
 }

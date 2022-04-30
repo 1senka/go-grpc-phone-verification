@@ -3,14 +3,15 @@ package services
 import (
 	"context"
 	"fmt"
-	"github.com/1senka/go-grpc-booking-svc/pkg/db"
-	"github.com/1senka/go-grpc-booking-svc/pkg/pb"
-	"github.com/1senka/go-grpc-booking-svc/pkg/profilepb"
-	"github.com/1senka/go-grpc-booking-svc/pkg/utils"
-	ptime "github.com/yaa110/go-persian-calendar"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strconv"
 	"time"
+
+	"github.com/1senka/go-grpc-booking-svc/pkg/db"
+	"github.com/1senka/go-grpc-booking-svc/pkg/pb"
+	"github.com/1senka/go-grpc-booking-svc/pkg/utils"
+	ptime "github.com/yaa110/go-persian-calendar"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 //
@@ -25,6 +26,10 @@ type Date struct {
 	Minute int32 `bson:"min"`
 }
 
+type FreeTime struct {
+	Date        Date   `bson:"date"`
+	TherapistId string `bson:"therapist_id"`
+}
 type Booking struct {
 	ID            primitive.ObjectID `bson:"_id,omitempty"`
 	UserId        string             `bson:"user_id"`
@@ -68,40 +73,44 @@ type Booking struct {
 //}
 type Server struct {
 	H db.Handler
-	C profilepb.ProfileServiceClient
 }
 
 func (s *Server) Booking(ctx context.Context, req *pb.BookingRequest) (*pb.BookingResponse, error) {
 	year, month, day, hour, minute := ptime.Now().Year(), ptime.Now().Month().String(), ptime.Now().Day(), ptime.Now().Hour(), ptime.Now().Minute()
 	year2, month2, day2, hour2, minute2 := ptime.Now().Add(time.Duration(time.Hour*4)).Year(), ptime.Now().Month().String(), ptime.Now().Day(), ptime.Now().Hour(), ptime.Now().Minute()
+	data := []*pb.FreeTime{}
 
 	fmt.Println(strconv.Itoa(year) + "/" + utils.GetMonthFromPersian(month) + "/" + strconv.Itoa(day) + "/" + strconv.Itoa(hour) + "/" + strconv.Itoa(minute))
 	ss, err := strconv.Atoi(utils.GetMonthFromPersian(month))
 	ss2, err2 := strconv.Atoi(utils.GetMonthFromPersian(month2))
 
 	if err == nil && err2 == nil {
-		startDate := &profilepb.Date{
+		startDate := &pb.Date{
 			Year:   int32(year),
 			Month:  int32(ss),
 			Day:    int32(day),
 			Hour:   int32(hour),
 			Minute: int32(minute),
 		}
-		endDate := &profilepb.Date{
+		endDate := &pb.Date{
 			Year:   int32(year2),
 			Month:  int32(ss2),
 			Day:    int32(day2),
 			Hour:   int32(hour2),
 			Minute: int32(minute2),
 		}
-		res, err3 := s.C.GetFreeTime(ctx, &profilepb.GetFreeTimeRequest{
-			StartDate: startDate,
-			EndDate:   endDate,
-		})
-		fmt.Println(res.FreeTimes)
+		cursor, err3 := s.H.FreeTimeCollection.Find(ctx, bson.D{{"date", bson.D{{"$gte", startDate}, {"$lte", endDate}}}})
 		if err3 != nil {
-			fmt.Println(err3.Error())
+			return &pb.BookingResponse{}, err3
 		}
+		for cursor.Next(ctx) {
+			var freeTime FreeTime
+			_ = cursor.Decode(&freeTime)
+			data = append(data, &pb.FreeTime{Date: &pb.Date{Year: freeTime.Date.Year, Month: freeTime.Date.Month, Day: freeTime.Date.Day, Hour: freeTime.Date.Hour, Minute: freeTime.Date.Minute},
+				TherapistId: freeTime.TherapistId,
+			})
+		}
+		fmt.Println(data)
 	} else {
 		fmt.Println("error")
 	}
@@ -110,6 +119,85 @@ func (s *Server) Booking(ctx context.Context, req *pb.BookingRequest) (*pb.Booki
 	//	StartDate:
 	//})
 	return &pb.BookingResponse{BookingId: "", BookingStatus: "", UserId: "", SessionType: "", IsHotline: false, BookingTime: "", TherapistName: "", TherapistId: ""}, nil
+}
+func (s *Server) GetBookingList(ctx context.Context, req *pb.GetBookingListRequest) (*pb.GetBookingListResponse, error) {
+	data := []*pb.Booking{}
+	id := req.GetUserId()
+	cursor, err := s.H.SessionCollection.Find(ctx, bson.D{{"user_id", id}})
+	if err != nil {
+		return &pb.GetBookingListResponse{
+			Bookings: []*pb.Booking{},
+		}, err
+		
+	}
+	for cursor.Next(ctx) {
+		var booking Booking
+		_ = cursor.Decode(&booking)
+		data = append(data, &pb.Booking{BookingId: booking.ID.String(),BookingStatus:  booking.BookingStatus,UserId:  booking.UserId,SessionType:  booking.SessionType,IsHotline:  booking.IsHotline,BookingTime: strconv.Itoa( int(booking.BookingDate.Year))+"/"+ strconv.Itoa(int(booking.BookingDate.Month))+"/"+ strconv.Itoa(int(booking.BookingDate.Day))+"/"+ strconv.Itoa(int(booking.BookingDate.Hour))+"/"+ strconv.Itoa(int(booking.BookingDate.Minute)) ,TherapistName:  booking.TherapistName,TherapistId:  booking.TherapistId})
+	}
+	return &pb.GetBookingListResponse{
+		Bookings: data,
+	},nil
+}
+
+
+
+func (s *Server) GetTherapistFreeTime(ctx context.Context, req *pb.TherapistGetFreeTimeRequest) (*pb.TherapistGetFreeTimeResponse, error) {
+	data := []*pb.FreeTime{}
+	cursor, error := s.H.FreeTimeCollection.Find(ctx, bson.D{{"therapist_id", req.GetId()}})
+	if error != nil {
+		return &pb.TherapistGetFreeTimeResponse{
+			Status:   400,
+			FreeTime: []*pb.FreeTime{},
+		}, nil
+	}
+	for cursor.Next(ctx) {
+		var freeTime FreeTime
+		_ = cursor.Decode(&freeTime)
+		data = append(data, &pb.FreeTime{Date: &pb.Date{Year: freeTime.Date.Year, Month: freeTime.Date.Month, Day: freeTime.Date.Day, Hour: freeTime.Date.Hour, Minute: freeTime.Date.Minute},
+			TherapistId: freeTime.TherapistId,
+		})
+	}
+	return &pb.TherapistGetFreeTimeResponse{
+		Status:   200,
+		FreeTime: data,
+	}, nil
+
+}
+func (s *Server) SetFreeTime(ctx context.Context, req *pb.TherapistSetFreeTimeRequest) (*pb.TherapistSetFreeTimeResponse, error) {
+
+	var freeTimes []interface{}
+	freeTime := req.GetFreeTime()
+	s.H.FreeTimeCollection.DeleteMany(ctx, bson.D{{"id", req.GetId()}})
+
+	for _, v := range freeTime {
+		_, er := s.H.FreeTimeCollection.InsertOne(ctx, &FreeTime{
+			TherapistId: req.Id, Date: Date{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour, Minute: v.Minute},
+		})
+		//_ = append(freeTimes, &FreeTime{
+		//	Date:        Date{Year: v.Year, Month: v.Month, Day: v.Day, Hour: v.Hour, Minute: v.Minute},
+		//	TherapistId: req.Id,
+		//})
+		if er != nil {
+			return &pb.TherapistSetFreeTimeResponse{
+				Status: 400,
+				Result: "خطا در ثبت زمان آزاد",
+			}, nil
+		}
+	}
+
+	fmt.Println(freeTimes)
+	//_, error := s.H.FreeTimeCollection.InsertMany(ctx, freeTimes)
+	//if error != nil {
+	//	return &pb.TherapistSetFreeTimeResponse{
+	//		Status: 400,
+	//		Result: error.Error(),
+	//	}, nil
+	//}
+	return &pb.TherapistSetFreeTimeResponse{
+		Status: 200,
+		Result: "اطلاعات با موفقیت ثبت شد",
+	}, nil
 }
 
 //
