@@ -24,6 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 type BookingServiceClient interface {
 	Booking(ctx context.Context, in *BookingRequest, opts ...grpc.CallOption) (*BookingResponse, error)
 	GetBookingList(ctx context.Context, in *GetBookingListRequest, opts ...grpc.CallOption) (*GetBookingListResponse, error)
+	GetTherapistFreeTime(ctx context.Context, in *TherapistGetFreeTimeRequest, opts ...grpc.CallOption) (*TherapistGetFreeTimeResponse, error)
+	SetFreeTime(ctx context.Context, in *TherapistSetFreeTimeRequest, opts ...grpc.CallOption) (*TherapistSetFreeTimeResponse, error)
 }
 
 type bookingServiceClient struct {
@@ -52,13 +54,33 @@ func (c *bookingServiceClient) GetBookingList(ctx context.Context, in *GetBookin
 	return out, nil
 }
 
+func (c *bookingServiceClient) GetTherapistFreeTime(ctx context.Context, in *TherapistGetFreeTimeRequest, opts ...grpc.CallOption) (*TherapistGetFreeTimeResponse, error) {
+	out := new(TherapistGetFreeTimeResponse)
+	err := c.cc.Invoke(ctx, "/booking.BookingService/GetTherapistFreeTime", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *bookingServiceClient) SetFreeTime(ctx context.Context, in *TherapistSetFreeTimeRequest, opts ...grpc.CallOption) (*TherapistSetFreeTimeResponse, error) {
+	out := new(TherapistSetFreeTimeResponse)
+	err := c.cc.Invoke(ctx, "/booking.BookingService/SetFreeTime", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BookingServiceServer is the server API for BookingService service.
 // All implementations must embed UnimplementedBookingServiceServer
 // for forward compatibility
 type BookingServiceServer interface {
 	Booking(context.Context, *BookingRequest) (*BookingResponse, error)
 	GetBookingList(context.Context, *GetBookingListRequest) (*GetBookingListResponse, error)
-	//mustEmbedUnimplementedBookingServiceServer()
+	GetTherapistFreeTime(context.Context, *TherapistGetFreeTimeRequest) (*TherapistGetFreeTimeResponse, error)
+	SetFreeTime(context.Context, *TherapistSetFreeTimeRequest) (*TherapistSetFreeTimeResponse, error)
+	mustEmbedUnimplementedBookingServiceServer()
 }
 
 // UnimplementedBookingServiceServer must be embedded to have forward compatible implementations.
@@ -70,6 +92,12 @@ func (UnimplementedBookingServiceServer) Booking(context.Context, *BookingReques
 }
 func (UnimplementedBookingServiceServer) GetBookingList(context.Context, *GetBookingListRequest) (*GetBookingListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBookingList not implemented")
+}
+func (UnimplementedBookingServiceServer) GetTherapistFreeTime(context.Context, *TherapistGetFreeTimeRequest) (*TherapistGetFreeTimeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTherapistFreeTime not implemented")
+}
+func (UnimplementedBookingServiceServer) SetFreeTime(context.Context, *TherapistSetFreeTimeRequest) (*TherapistSetFreeTimeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetFreeTime not implemented")
 }
 func (UnimplementedBookingServiceServer) mustEmbedUnimplementedBookingServiceServer() {}
 
@@ -120,6 +148,42 @@ func _BookingService_GetBookingList_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BookingService_GetTherapistFreeTime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TherapistGetFreeTimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BookingServiceServer).GetTherapistFreeTime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/booking.BookingService/GetTherapistFreeTime",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BookingServiceServer).GetTherapistFreeTime(ctx, req.(*TherapistGetFreeTimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BookingService_SetFreeTime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TherapistSetFreeTimeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BookingServiceServer).SetFreeTime(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/booking.BookingService/SetFreeTime",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BookingServiceServer).SetFreeTime(ctx, req.(*TherapistSetFreeTimeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BookingService_ServiceDesc is the grpc.ServiceDesc for BookingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +198,14 @@ var BookingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetBookingList",
 			Handler:    _BookingService_GetBookingList_Handler,
+		},
+		{
+			MethodName: "GetTherapistFreeTime",
+			Handler:    _BookingService_GetTherapistFreeTime_Handler,
+		},
+		{
+			MethodName: "SetFreeTime",
+			Handler:    _BookingService_SetFreeTime_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
