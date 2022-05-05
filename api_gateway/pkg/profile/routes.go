@@ -17,7 +17,7 @@ func RegisterRoutes(r *gin.Engine, c *config.Config, authSvc *auth.ServiceClient
 	routes := r.Group("/profile")
 	routes.Use(a.AuthRequired)
 	routes.POST("/", svc.CreateProfile)
-	routes.GET("/", svc.GetProfile)
+	routes.POST("/getProfile", svc.GetProfile)
 	routes.PUT("/", svc.UpdateProfile)
 
 }

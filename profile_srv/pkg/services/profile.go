@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/1senka/go-grpc-profile-svc/pkg/db"
 	profilepb "github.com/1senka/go-grpc-profile-svc/pkg/pb"
@@ -49,31 +50,34 @@ type Server struct {
 func (s *Server) ClientCreateProfile(ctx context.Context, req *profilepb.ClientCreateProfileRequest) (*profilepb.ClientCreateProfileResponse, error) {
 	data := &ClientProfile{}
 	fmt.Println(req)
-	phone, _ := ctx.Value("phone").(string)
-	_ = s.H.ClientCollection.FindOne(ctx, bson.D{{"phone_number", req.GetPhone()}}).Decode(data)
-	if data.ID != primitive.NilObjectID {
-		return &profilepb.ClientCreateProfileResponse{
-			Status: 400,
-			Result: "شماره موبایل وارد شده در سیستم ثبت شده است",
-		}, nil
-	}
-	_, error := s.H.ClientCollection.InsertOne(ctx, &ClientProfile{
-		UserId:      req.GetUserId(),
-		PhoneNumber: phone,
-		Name:        req.GetName(),
-		BirthDate:   req.GetBirthdate(),
-		Email:       req.GetEmail(),
-		Gender:      req.GetGender(),
-	})
-	if error != nil {
-		return &profilepb.ClientCreateProfileResponse{
-			Status: 400,
-			Result: "خطا در ثبت اطلاعات",
-		}, nil
+
+	er := s.H.ClientCollection.FindOne(ctx, bson.D{{"user_id", req.GetUserId()}}).Decode(data)
+	if er != nil {
+		if er == mongo.ErrNoDocuments {
+			_, error := s.H.ClientCollection.InsertOne(ctx, &ClientProfile{
+				UserId:      req.GetUserId(),
+				PhoneNumber: req.GetPhone(),
+				Name:        req.GetName(),
+				BirthDate:   req.GetBirthdate(),
+				Email:       req.GetEmail(),
+				Gender:      req.GetGender(),
+			})
+			if error != nil {
+				return &profilepb.ClientCreateProfileResponse{
+					Status: 400,
+					Result: "خطا در ثبت اطلاعات",
+				}, nil
+			}
+			return &profilepb.ClientCreateProfileResponse{
+				Status: 200,
+				Result: "اطلاعات با موفقیت ثبت شد",
+			}, nil
+		}
+
 	}
 	return &profilepb.ClientCreateProfileResponse{
-		Status: 200,
-		Result: "اطلاعات با موفقیت ثبت شد",
+		Status: 400,
+		Result: "شماره موبایل وارد شده در سیستم ثبت شده است",
 	}, nil
 
 }
