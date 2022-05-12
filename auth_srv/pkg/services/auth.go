@@ -29,7 +29,7 @@ type Server struct {
 }
 
 func (s *Server) Verify(ctx context.Context, req *pb.VerifyRequest) (*pb.VerifyResponse, error) {
-	fmt.Println("Verify invoked %v", req)
+	fmt.Printf("Verify invoked %v", req)
 	var smsVerify models.SmsVerify
 	err := s.H.SmsVerifyCollection.FindOne(context.Background(), bson.M{"phone": req.Phone}).Decode(&smsVerify)
 	if err != nil {
