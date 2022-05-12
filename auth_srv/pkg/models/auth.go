@@ -2,16 +2,17 @@ package models
 
 import (
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type User struct {
-	Id         int64  `json:"id" gorm:"primaryKey"`
-	Phone      string `json:"phone"`
-	ClientType string `json:"clientType"`
+	Id          primitive.ObjectID  `bson:"_id,omitempty"`
+	Phone      string `bson:"phone"`
 }
 type SmsVerify struct {
-	ID         int64     `json:"id" gorm:"primaryKey"`
-	Phone      string    `json:"phone"`
-	Code       string    `json:"code"`
-	ExpireTime time.Time `json:"expire_time"`
+	ID            primitive.ObjectID `bson:"_id,omitempty"`
+	Phone      string    `bson:"phone"`
+	Code       string    `bson:"code"`
+	CreatedAt  time.Time 	`bson:"created_at"`
 }

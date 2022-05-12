@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/1senka/go-grpc-api-gateway/pkg/auth/pb"
@@ -42,7 +41,7 @@ func (c *AuthMiddlewareConfig) AuthRequired(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Set("userId", strconv.Itoa(int(res.UserId)))
+	ctx.Set("userId", res.UserId)
 	ctx.Set("phone", res.Phone)
 	ctx.Next()
 }

@@ -12,16 +12,16 @@ func RegisterRoutes(r *gin.Engine, c *config.Config) *ServiceClient {
 	}
 
 	routes := r.Group("/auth")
-	routes.POST("/proof", svc.PhoneProof)
-	routes.POST("/token", svc.PhoneToken)
+	routes.POST("/getcode", svc.GetCode)
+	routes.POST("/verify", svc.Verify)
 
 	return svc
 }
 
-func (svc *ServiceClient) PhoneProof(ctx *gin.Context) {
-	routes.Proof(ctx, svc.Client)
+func (svc *ServiceClient) GetCode(ctx *gin.Context) {
+	routes.GetCode(ctx, svc.Client)
 }
 
-func (svc *ServiceClient) PhoneToken(ctx *gin.Context) {
-	routes.Token(ctx, svc.Client)
+func (svc *ServiceClient) Verify(ctx *gin.Context) {
+	routes.Verify(ctx, svc.Client)
 }

@@ -1,20 +1,11 @@
 {
   "folders": [
-	{
-		"path": "."
-	},
-	{
-		"path": "profile_srv"
-	},
-	{
-		"path": "booking_srv"
-	},
-	{
-		"path": "api_gateway"
-	},
-	{
-		"path": "auth_srv"
-	}
-],
+    {
+      "path": "api_gateway"
+    },
+    {
+      "path": "auth_srv"
+    }
+  ],
   "settings": {}
 }

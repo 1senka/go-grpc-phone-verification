@@ -8,21 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type TokenRequestBody struct {
+type VerifyRequestBody struct {
 	Phone      string `json:"phone"`
 	Code       string `json:"code"`
-	ClientType string `json:"clientType"`
 }
 
-func Token(ctx *gin.Context, c pb.AuthServiceClient) {
-	b := TokenRequestBody{}
+func Verify(ctx *gin.Context, c pb.AuthServiceClient) {
+	b := VerifyRequestBody{}
 
 	if err := ctx.BindJSON(&b); err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	res, err := c.PhoneToken(context.Background(), &pb.ClientPhoneTokenRequest{
+	res, err := c.Verify(context.Background(), &pb.VerifyRequest{
 		Phone: b.Phone,
 
 		Code: b.Code,
@@ -32,6 +31,9 @@ func Token(ctx *gin.Context, c pb.AuthServiceClient) {
 		ctx.AbortWithError(http.StatusBadGateway, err)
 		return
 	}
-
+	if (res.Token == "") {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 	ctx.JSON(http.StatusCreated, &res)
 }

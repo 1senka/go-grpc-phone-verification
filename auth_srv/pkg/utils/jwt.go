@@ -4,7 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/1senka/go-grpc-auth-svc/pkg/models"
+	"auth_svc/pkg/models"
+
 	"github.com/golang-jwt/jwt"
 )
 
@@ -16,13 +17,13 @@ type JwtWrapper struct {
 
 type jwtClaims struct {
 	jwt.StandardClaims
-	Id    int64
+	Id    string
 	Phone string
 }
 
 func (w *JwtWrapper) GenerateToken(user models.User) (signedToken string, err error) {
 	claims := &jwtClaims{
-		Id:    user.Id,
+		Id:    user.Id.String(),
 		Phone: user.Phone,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(w.ExpirationHours)).Unix(),

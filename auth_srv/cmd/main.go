@@ -2,15 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/1senka/go-grpc-auth-svc/pkg/sms"
 	"log"
 	"net"
 
-	"github.com/1senka/go-grpc-auth-svc/pkg/config"
-	"github.com/1senka/go-grpc-auth-svc/pkg/db"
-	"github.com/1senka/go-grpc-auth-svc/pkg/pb"
-	"github.com/1senka/go-grpc-auth-svc/pkg/services"
-	"github.com/1senka/go-grpc-auth-svc/pkg/utils"
+	"auth_svc/pkg/config"
+	"auth_svc/pkg/db"
+	"auth_svc/pkg/pb"
+	"auth_svc/pkg/services"
+	"auth_svc/pkg/sms"
+	"auth_svc/pkg/utils"
+
+	// "auth_svc/pkg/pb"
+
 	"google.golang.org/grpc"
 )
 
