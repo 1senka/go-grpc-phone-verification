@@ -38,7 +38,7 @@ func Init(url string) Handler {
 	index := mongo.IndexModel{
 		Keys: bsonx.Doc{
 	   {"created_at", bsonx.Int32(1)}},
-		Options:options.Index().SetExpireAfterSeconds(30),
+		Options:options.Index().SetExpireAfterSeconds(300),
 	}
 	
 	SmsVerifyCollection = db.Database("auth_svc").Collection("smsVerify")
